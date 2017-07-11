@@ -82,6 +82,7 @@ public class SonarToGerritPublisher extends Publisher implements SimpleBuildStep
     private String severity;
     private boolean changedLinesOnly;
     private boolean newIssuesOnly;
+    private boolean failOnly;
     private String noIssuesToPostText;
     private String someIssuesToPostText;
     private String issueComment;
@@ -103,7 +104,7 @@ public class SonarToGerritPublisher extends Publisher implements SimpleBuildStep
                                   String noIssuesToPostText, String someIssuesToPostText, String issueComment,
                                   boolean overrideCredentials, String httpUsername, String httpPassword,
                                   boolean postScore, String category, String noIssuesScore, String issuesScore,
-                                  String noIssuesNotification, String issuesNotification) {
+                                  String noIssuesNotification, String issuesNotification, boolean failOnly) {
         this.sonarURL = MoreObjects.firstNonNull(sonarURL, DEFAULT_SONAR_URL);
         this.subJobConfigs = subJobConfigs;
         this.severity = MoreObjects.firstNonNull(severity, Severity.MAJOR.name());
@@ -121,6 +122,7 @@ public class SonarToGerritPublisher extends Publisher implements SimpleBuildStep
         this.issuesScore = issuesScore;
         this.noIssuesNotification = noIssuesNotification;
         this.issuesNotification = issuesNotification;
+        this.failOnly = failOnly;
 
         // old values - not used anymore. will be deleted in further releases
         this.path = null;
@@ -145,6 +147,7 @@ public class SonarToGerritPublisher extends Publisher implements SimpleBuildStep
         this.issuesScore = "0";
         this.noIssuesNotification = null;
         this.issuesNotification = null;
+        this.failOnly = false;
 
         this.path = null;
         this.projectPath = null;
@@ -341,6 +344,10 @@ public class SonarToGerritPublisher extends Publisher implements SimpleBuildStep
                 // Step 4a - Filter issues by changed lines in file only
                 filterIssuesByChangedLines(file2issues, revision);
 //                logResultMap(file2issues, "Filter issues by changed lines: {0} elements");
+            }
+
+            if (file2issues.isEmpty() && failOnly) {
+                return;
             }
 
             // Step 6 - Send review to Gerrit

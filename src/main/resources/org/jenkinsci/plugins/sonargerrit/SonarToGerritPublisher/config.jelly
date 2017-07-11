@@ -61,6 +61,11 @@
                  description="${%jenkins.plugin.settings.filter.lines.changed.description}">
             <f:checkbox default="true"/>
         </f:entry>
+
+        <f:entry title="${%jenkins.plugin.settings.filter.failonly}" field="failOnly"
+                 description="${%jenkins.plugin.settings.filter.failonly.description}">
+            <f:checkbox default="false"/>
+        </f:entry>
     </f:section>
     <f:advanced>
 
